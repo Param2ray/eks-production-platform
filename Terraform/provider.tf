@@ -7,9 +7,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "eks-deployment-tfstate"
-    key    = "terraform.tfstate"
-    region = "ca-central-1"
+    bucket       = "eks-deployment-tfstate"
+    key          = "terraform.tfstate"
+    region       = "ca-central-1"
     use_lockfile = true
   }
 }
