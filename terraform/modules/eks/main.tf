@@ -1,16 +1,15 @@
 resource "aws_eks_cluster" "eks_cluster" {
-  name = "eks_cluster"
+  name     = var.cluster_name
+  role_arn = aws_iam_role.cluster.arn
+  version  = var.eks_version
 
   access_config {
     authentication_mode = "API"
   }
 
-  role_arn = aws_iam_role.cluster.arn
-  version  = "1.31"
-
   vpc_config {
-  subnet_ids = var.private_subnet_ids
-}
+    subnet_ids = var.private_subnet_ids
+  }
 
   depends_on = [
     aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,
@@ -18,7 +17,8 @@ resource "aws_eks_cluster" "eks_cluster" {
 }
 
 resource "aws_iam_role" "cluster" {
-  name = "eks-cluster"
+  name = "${var.cluster_name}-role"
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -31,7 +31,7 @@ resource "aws_iam_role" "cluster" {
         Principal = {
           Service = "eks.amazonaws.com"
         }
-      },
+      }
     ]
   })
 }
@@ -41,12 +41,47 @@ resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
   role       = aws_iam_role.cluster.name
 }
 
+resource "aws_iam_role" "eks_node_role" {
+  name = "${var.node_group_name}-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEKSWorkerNodePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.eks_node_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.eks_node_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.eks_node_role.name
+}
+
 resource "aws_eks_node_group" "eks_node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = "node_group"
+  node_group_name = var.node_group_name
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = var.private_subnet_ids
-  ami_type        = var.ami
+  ami_type        = var.ami_type
   instance_types  = [var.instance_type]
 
   scaling_config {
@@ -60,7 +95,6 @@ resource "aws_eks_node_group" "eks_node_group" {
   }
 
   depends_on = [
-
     aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly,
