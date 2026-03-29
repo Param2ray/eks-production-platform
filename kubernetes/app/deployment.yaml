@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: web-app
-          image: image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/web-app:7760346
+          image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/web-app:7760346
           ports:
             - containerPort: 8080
