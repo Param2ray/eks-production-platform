@@ -1,3 +1,5 @@
+# EKS Production Platform (Work in Progress)
+
 🚧 Work in Progress: EKS Infrastructure Project
 
 This project is currently under development as I deepen my understanding of Kubernetes and EKS.
