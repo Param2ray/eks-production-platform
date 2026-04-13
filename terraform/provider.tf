@@ -20,7 +20,7 @@ provider "aws" {
 
 provider "helm" {
   kubernetes = {
-    host        = module.eks.eks-cluster-endpoint
+    host        = module.eks.cluster_endpoint
     config_path = "~/.kube/config"
   }
 }
