@@ -15,6 +15,7 @@ resource "aws_subnet" "public_subnet_1" {
   cidr_block        = var.public_subnet_cidrs[0]
   tags = {
     Name = "eks_public_subnet_1"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
@@ -24,6 +25,8 @@ resource "aws_subnet" "public_subnet_2" {
   cidr_block        = var.public_subnet_cidrs[1]
   tags = {
     Name = "eks_public_subnet_2"
+    "kubernetes.io/role/elb" = "1"
+
   }
 }
 
@@ -33,6 +36,7 @@ resource "aws_subnet" "private_subnet_1" {
   cidr_block        = var.private_subnet_cidrs[0]
   tags = {
     Name = "eks_private_subnet_1"
+    "kubernetes.io/role/internal-elb" = "1"
   }
 }
 
@@ -42,6 +46,7 @@ resource "aws_subnet" "private_subnet_2" {
   cidr_block        = var.private_subnet_cidrs[1]
   tags = {
     Name = "eks_private_subnet_2"
+    "kubernetes.io/role/internal-elb" = "1"
   }
 }
 
