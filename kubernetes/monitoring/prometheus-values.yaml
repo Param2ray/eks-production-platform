@@ -1,0 +1,10 @@
+server:
+  persistentVolume:
+    enabled: false
+
+  service:
+    type: ClusterIP
+
+alertmanager:
+  persistence:
+    enabled: false
