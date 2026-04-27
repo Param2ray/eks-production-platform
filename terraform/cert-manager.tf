@@ -1,0 +1,11 @@
+resource "helm_release" "cert_manager" {
+  name             = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
+  namespace        = "cert-manager"
+  create_namespace = true
+
+  values = [
+    file("${path.module}/../kubernetes/helm-values/cert-manager-values.yaml")
+  ]
+}
