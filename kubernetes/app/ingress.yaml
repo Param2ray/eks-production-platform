@@ -7,7 +7,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: web-app.tm.paramjyot2ray.com
+    - host: eks.paramjyot2ray.com
       http:
         paths:
           - path: /
@@ -19,5 +19,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - web-app.tm.paramjyot2ray.com
+        - eks.paramjyot2ray.com
       secretName: web-app-tls
