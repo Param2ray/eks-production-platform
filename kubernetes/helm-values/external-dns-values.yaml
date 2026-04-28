@@ -11,7 +11,7 @@ sources:
 
 domainFilters:
   - tm.paramjyot2ray.com
-
+  
 serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::512378127667:role/external-dns
