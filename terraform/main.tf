@@ -16,7 +16,14 @@ module "eks" {
 
   node_group_name = "eks-node-group"
   instance_type   = "t3.medium"
-  desired_size    = 2
-  min_size        = 1
-  max_size        = 2
+
+  desired_size = 2
+  min_size     = 1
+  max_size     = 2
+}
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  name = "eks-platform-app"
 }
