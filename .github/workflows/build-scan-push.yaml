@@ -1,6 +1,7 @@
 name: Build Scan Push
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -10,8 +11,8 @@ on:
       - ".github/workflows/build-scan-push.yaml"
 
 env:
-  AWS_REGION: ca-central-1
-  ECR_REPOSITORY: eks-platform-app
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
 
 permissions:
   id-token: write
