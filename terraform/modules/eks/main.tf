@@ -3,6 +3,14 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = aws_iam_role.cluster.arn
   version  = var.eks_version
 
+  enabled_cluster_log_types = [
+    "api",
+    "audit",
+    "authenticator",
+    "controllerManager",
+    "scheduler"
+  ]
+
   access_config {
     authentication_mode = "API"
   }
