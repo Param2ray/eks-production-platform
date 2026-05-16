@@ -32,10 +32,50 @@ resource "aws_eks_cluster" "eks_cluster" {
   ]
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_policy_document" "eks_secrets_kms" {
+  statement {
+    sid    = "EnableRootAccountPermissions"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+
+    actions = [
+      "kms:*"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "AllowEKSServiceToUseKey"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com"]
+    }
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:DescribeKey",
+      "kms:GenerateDataKey"
+    ]
+
+    resources = ["*"]
+  }
+}
+
 resource "aws_kms_key" "eks_secrets" {
   description             = "KMS key for EKS secrets encryption"
   deletion_window_in_days = 7
   enable_key_rotation     = true
+  policy                  = data.aws_iam_policy_document.eks_secrets_kms.json
 
   tags = {
     Name        = "${var.cluster_name}-secrets-key"
