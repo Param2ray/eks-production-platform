@@ -11,6 +11,14 @@ resource "aws_eks_cluster" "eks_cluster" {
     "scheduler"
   ]
 
+  encryption_config {
+    provider {
+      key_arn = aws_kms_key.eks_secrets.arn
+    }
+
+    resources = ["secrets"]
+  }
+
   access_config {
     authentication_mode = "API"
   }
@@ -22,6 +30,23 @@ resource "aws_eks_cluster" "eks_cluster" {
   depends_on = [
     aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,
   ]
+}
+
+resource "aws_kms_key" "eks_secrets" {
+  description             = "KMS key for EKS secrets encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+
+  tags = {
+    Name        = "${var.cluster_name}-secrets-key"
+    Environment = "production"
+    ManagedBy   = "terraform"
+  }
+}
+
+resource "aws_kms_alias" "eks_secrets" {
+  name          = "alias/${var.cluster_name}-secrets"
+  target_key_id = aws_kms_key.eks_secrets.key_id
 }
 
 resource "aws_iam_role" "cluster" {
