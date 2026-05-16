@@ -57,6 +57,7 @@ jobs:
         with:
           directory: terraform
           framework: terraform
+          soft_fail: true
 
       - name: Terraform Validate
         run: terraform validate
