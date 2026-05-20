@@ -8,6 +8,7 @@ on:
     paths:
       - "app/**"
       - "Dockerfile"
+      - "kubernetes/app/deployment.yaml"
       - ".github/workflows/build-scan-push.yaml"
 
 env:
@@ -16,7 +17,7 @@ env:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   build-scan-push:
@@ -42,8 +43,8 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-          -t $ECR_REPOSITORY:$IMAGE_TAG \
-          -f app/Dockerfile app
+            -t $ECR_REPOSITORY:$IMAGE_TAG \
+            -f app/Dockerfile app
 
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@master
@@ -55,8 +56,20 @@ jobs:
       - name: Tag image for ECR
         run: |
           docker tag $ECR_REPOSITORY:$IMAGE_TAG \
-          ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Push image to ECR
         run: |
           docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update Kubernetes deployment image tag
+        run: |
+          sed -i "s|image: .*${ECR_REPOSITORY}:.*|image: ${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" kubernetes/app/deployment.yaml
+
+      - name: Commit updated Kubernetes manifest
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add kubernetes/app/deployment.yaml
+          git commit -m "Update app image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+          git push
