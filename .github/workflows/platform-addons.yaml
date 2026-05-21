@@ -102,6 +102,16 @@ jobs:
             --create-namespace \
             --set service.type=LoadBalancer
 
+      - name: Apply cert-manager ClusterIssuer
+        run: |
+          kubectl apply -f kubernetes/cert-manager/cluster-issuer.yaml
+
+      - name: Apply ArgoCD application
+        run: |
+          kubectl apply -f kubernetes/argocd/web-app.yaml
+
       - name: Verify platform pods
         run: |
           kubectl get pods -A
+          kubectl get applications -n argocd
+          kubectl get clusterissuer
