@@ -1,0 +1,76 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: 'Type destroy to confirm full platform and infrastructure destruction'
+        required: true
+        type: string
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
+  TF_WORKING_DIR: terraform
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-destroy:
+    runs-on: ubuntu-latest
+
+    if: github.event.inputs.confirm_destroy == 'destroy'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE }}
+
+      - name: Update kubeconfig
+        continue-on-error: true
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER_NAME
+
+      - name: Delete application and ArgoCD app
+        continue-on-error: true
+        run: |
+          kubectl delete -f kubernetes/app/ --ignore-not-found=true
+          kubectl delete -f kubernetes/argocd/web-app.yaml --ignore-not-found=true
+
+      - name: Delete cert-manager ClusterIssuer
+        continue-on-error: true
+        run: |
+          kubectl delete -f kubernetes/cert-manager/cluster-issuer.yaml --ignore-not-found=true
+
+      - name: Uninstall Helm platform addons
+        continue-on-error: true
+        run: |
+          helm uninstall grafana -n monitoring || true
+          helm uninstall prometheus -n monitoring || true
+          helm uninstall external-dns -n external-dns || true
+          helm uninstall cert-manager -n cert-manager || true
+          helm uninstall ingress-nginx -n ingress-nginx || true
+          helm uninstall argocd -n argocd || true
+
+      - name: Wait for AWS load balancers to delete
+        run: sleep 180
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Destroy
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform destroy -auto-approve
