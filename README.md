@@ -30,21 +30,28 @@ https://eks.tm.paramjyot2ray.com
 
 ## Table of Contents
 
-- Overview
-- Tech Stack
-- Repository Structure
-- Architecture Overview
-- CI/CD Workflow
-- Kubernetes Application Flow
-- GitOps with ArgoCD
-- DNS and HTTPS
-- Monitoring and Observability
-- Security and Validation
-- Terraform and State Management
-- Screenshots
-- Destroy Workflow
-- What This Project Demonstrates
-- Future Improvements
+## Table of Contents
+
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Repository Structure](#repository-structure)
+- [Architecture Overview](#architecture-overview)
+- [CI/CD Workflow](#cicd-workflow)
+- [Terraform Plan](#terraform-plan)
+- [Terraform Apply](#terraform-apply)
+- [Platform Addons](#platform-addons)
+- [Build, Scan and Push](#build-scan-and-push)
+- [Kubernetes Application Flow](#kubernetes-application-flow)
+- [GitOps with ArgoCD](#gitops-with-argocd)
+- [DNS and HTTPS](#dns-and-https)
+- [Monitoring and Observability](#monitoring-and-observability)
+- [Security and Validation](#security-and-validation)
+- [Terraform and State Management](#terraform-and-state-management)
+- [Screenshots](#screenshots)
+- [GitHub Actions Pipelines](#github-actions-pipelines)
+- [Destroy Workflow](#destroy-workflow)
+- [What This Project Demonstrates](#what-this-project-demonstrates)
+- [Future Improvements](#future-improvements)
 
 ## Overview
 
