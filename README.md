@@ -25,7 +25,7 @@ https://eks.tm.paramjyot2ray.com
 
 ## Architecture Diagram
 
-<img width="1159" height="1339" alt="EKS Architectural diagram" src="https://github.com/user-attachments/assets/644b2879-6ff6-4d4e-b771-e8f83cb69ed2" />
+<img width="3477" height="4017" alt="EKS Architecture" src="https://github.com/user-attachments/assets/78157346-3366-4753-a9ee-a2c560d52c0a" />
 
 
 ## Table of Contents
