@@ -534,11 +534,11 @@ This provides:
 
 ### Build scan push pipeline
 
-<img width="316" height="216" alt="destroy" src="https://github.com/user-attachments/assets/9de15b99-ece2-46e7-9e1d-0f1a1714b92b" />
+<img width="341" height="211" alt="build-scan-push" src="https://github.com/user-attachments/assets/469baa86-011c-4f62-9ca6-6924373f3220" />
 
 ### Terraform destroy pipeline
 
-<img width="341" height="211" alt="build-scan-push" src="https://github.com/user-attachments/assets/469baa86-011c-4f62-9ca6-6924373f3220" />
+<img width="316" height="216" alt="destroy" src="https://github.com/user-attachments/assets/9de15b99-ece2-46e7-9e1d-0f1a1714b92b" />
 
 
 
