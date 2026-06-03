@@ -126,6 +126,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_ecr" {
 }
 
 resource "aws_ecr_repository" "frontend" {
+
   name                 = var.frontend_ecr_name
   image_tag_mutability = "IMMUTABLE"
   force_delete         = true
@@ -135,7 +136,7 @@ resource "aws_ecr_repository" "frontend" {
   }
 
   encryption_configuration {
-    encryption_type = "AES256"
+    encryption_type = "KMS"
   }
 
   tags = {
