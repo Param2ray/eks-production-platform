@@ -27,3 +27,9 @@ module "ecr" {
 
   name = "eks-platform-app"
 }
+
+module "backend_ecr" {
+  source = "./modules/ecr"
+
+  name = "eks-platform-backend"
+}
