@@ -21,15 +21,3 @@ module "eks" {
   min_size     = 1
   max_size     = 2
 }
-
-module "ecr" {
-  source = "./modules/ecr"
-
-  name = "eks-platform-app"
-}
-
-module "backend_ecr" {
-  source = "./modules/ecr"
-
-  name = "eks-platform-backend"
-}
