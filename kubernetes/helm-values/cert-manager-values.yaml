@@ -5,6 +5,3 @@ extraArgs:
   - --dns01-recursive-nameservers=8.8.8.8:53
   - --dns01-recursive-nameservers-only
 
-serviceAccount:
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::512378127667:role/cert-manager
