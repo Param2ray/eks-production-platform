@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: web-app
-          image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/eks-platform-app:d82714fb561afbae6a12fe768220bc6f71b20555
+          image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/eks-platform-app:1aaf127b2c269c89b8b3afd1af18c55d565cfdf7
           ports:
             - containerPort: 8080
