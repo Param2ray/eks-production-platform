@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend-api
-          image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/backend-api:PLACEHOLDER
+          image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/eks-platform-backend:manual-v1
           ports:
             - containerPort: 3000
           readinessProbe:
