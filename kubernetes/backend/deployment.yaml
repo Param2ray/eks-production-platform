@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend-api
-          image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/eks-platform-backend:manual-v1
+          image: 512378127667.dkr.ecr.ca-central-1.amazonaws.com/eks-platform-backend:01d6a6b1211f58636a7f976cc795ca167aa312c9
           ports:
             - containerPort: 3000
           readinessProbe:
