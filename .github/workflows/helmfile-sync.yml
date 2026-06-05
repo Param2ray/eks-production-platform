@@ -1,0 +1,55 @@
+name: Platform Addons
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  platform-addons:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER_NAME
+
+      - name: Install Helmfile
+        run: |
+          HELMFILE_VERSION="1.5.2"
+          curl -fsSL \
+            "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz" \
+            -o helmfile.tar.gz
+          tar -xzf helmfile.tar.gz
+          sudo mv helmfile /usr/local/bin/helmfile
+          helmfile --version
+
+      - name: Deploy platform add-ons
+        run: |
+          helmfile -f kubernetes/helmfile.yaml sync
+
+      - name: Apply ArgoCD applications
+        run: |
+          kubectl apply -f kubernetes/argocd/
+
+      - name: Verify platform
+        run: |
+          kubectl get pods -A
+          kubectl get applications -n argocd
