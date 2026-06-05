@@ -126,10 +126,57 @@ https://eks.tm.paramjyot2ray.com
 ```text
 eks-production-platform/
 ├── .github/
-├── app/
+│   └── workflows/
+│       ├── build-scan-push.yaml      # Build, scan & push image to ECR
+│       ├── terraform-plan.yaml       # Terraform plan
+│       ├── terraform-apply.yaml      # Terraform apply
+│       └── terraform-destroy.yaml    # Guarded destroy workflow
+│
+├── app/                              # Application source code
+│
 ├── kubernetes/
+│   ├── app/
+│   │   ├── deployment.yaml
+│   │   ├── service.yaml
+│   │   └── ingress.yaml
+│   │
+│   ├── argocd/
+│   │   ├── deployment.yaml
+│   │   └── service.yaml
+│   │
+│   ├── cert-manager/
+│   │   └── cluster-issuer.yaml
+│   │
+│   ├── helm-values/
+│   │   ├── traefik-values.yaml
+│   │   ├── cert-manager-values.yaml
+│   │   └── external-dns-values.yaml
+│   │
+│   └── monitoring/
+│       ├── prometheus-values.yaml
+│       └── grafana-values.yaml
+│
 ├── terraform/
-└── README.md
+│   ├── main.tf
+│   ├── provider.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── terraform.tfvars
+│   ├── external-dns-iam.tf
+│   │
+│   └── modules/
+│       ├── vpc/
+│       ├── eks/
+│       └── ecr/
+│
+├── bootstrap/
+│   └── terraform/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+│
+├── README.md
+└── .gitignore
 ```
 
 ---
