@@ -40,7 +40,7 @@ The platform provisions AWS infrastructure, deploys workloads using GitOps, auto
 
 ## Architecture Diagram
 
-[Insert updated architecture diagram here]
+<img width="1159" height="1339" alt="EKS Architectural diagram drawio" src="https://github.com/user-attachments/assets/c87678fc-f636-4339-94e8-4a8c1e26ae5d" />
 
 ---
 
