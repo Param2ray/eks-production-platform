@@ -31,8 +31,6 @@ releases:
     chart: jetstack/cert-manager
     values:
       - helm-values/cert-manager-values.yaml
-    needs:
-      - traefik
 
   - name: external-dns
     namespace: external-dns
