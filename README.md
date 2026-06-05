@@ -334,11 +334,19 @@ Grafana dashboards provide visibility into:
 
 ## GitHub Actions Pipelines
 
+### Terraform Plan
+
 <img width="319" height="233" alt="plan" src="https://github.com/user-attachments/assets/bb0bccca-adc0-4035-bdd4-7534b8b18570" />
+
+### Terraform Apply
 
 <img width="345" height="235" alt="apply" src="https://github.com/user-attachments/assets/a041edab-4234-4b79-8f92-78af6fd11606" />
 
+### Build Scan Push
+
 <img width="341" height="211" alt="build-scan-push" src="https://github.com/user-attachments/assets/de636001-df39-4fe9-b53a-a19507b784dc" />
+
+### Terraform Destroy
 
 <img width="316" height="216" alt="destroy" src="https://github.com/user-attachments/assets/2993dd28-27f8-46e9-901a-5b4692475560" />
 
