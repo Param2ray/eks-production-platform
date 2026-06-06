@@ -50,10 +50,3 @@ releases:
     chart: prometheus-community/kube-prometheus-stack
     values:
       - monitoring/prometheus-values.yaml
-
-  - name: grafana
-    namespace: monitoring
-    createNamespace: true
-    chart: grafana/grafana
-    values:
-      - monitoring/grafana-values.yaml
