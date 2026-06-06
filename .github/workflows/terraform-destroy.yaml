@@ -86,7 +86,6 @@ jobs:
         run: sleep 600
 
       - name: Get VPC ID
-        id: vpc
         continue-on-error: true
         run: |
           VPC_ID=$(aws ec2 describe-vpcs \
@@ -124,7 +123,24 @@ jobs:
               --load-balancer-arn $lb || true
           done
 
-      - name: Wait for AWS ENIs to release
+      - name: Wait for load balancer resources to release
+        run: sleep 300
+
+      - name: Delete leftover Kubernetes ELB security groups
+        continue-on-error: true
+        run: |
+          for sg in $(aws ec2 describe-security-groups \
+            --region $AWS_REGION \
+            --filters "Name=vpc-id,Values=${VPC_ID}" "Name=group-name,Values=k8s-elb-*" \
+            --query "SecurityGroups[*].GroupId" \
+            --output text); do
+            echo "Deleting Kubernetes ELB security group: $sg"
+            aws ec2 delete-security-group \
+              --region $AWS_REGION \
+              --group-id $sg || true
+          done
+
+      - name: Wait for AWS dependencies to release
         run: sleep 300
 
       - name: Setup Terraform
@@ -136,4 +152,8 @@ jobs:
 
       - name: Terraform Destroy
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform destroy -auto-approve
+        run: |
+          terraform destroy -auto-approve || true
+          echo "First destroy pass finished. Waiting before retry..."
+          sleep 300
+          terraform destroy -auto-approve
