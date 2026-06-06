@@ -20,7 +20,6 @@ permissions:
 jobs:
   terraform-destroy:
     runs-on: ubuntu-latest
-
     if: github.event.inputs.confirm_destroy == 'destroy'
 
     steps:
@@ -40,7 +39,18 @@ jobs:
             --region $AWS_REGION \
             --name $EKS_CLUSTER_NAME
 
-      - name: Delete ArgoCD applications
+      - name: Install Helmfile
+        continue-on-error: true
+        run: |
+          HELMFILE_VERSION="1.5.2"
+          curl -fsSL \
+            "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz" \
+            -o helmfile.tar.gz
+          tar -xzf helmfile.tar.gz
+          sudo mv helmfile /usr/local/bin/helmfile
+          helmfile --version
+
+      - name: Delete ArgoCD application manifests
         continue-on-error: true
         run: |
           kubectl delete -f kubernetes/argocd/ --ignore-not-found=true
@@ -52,17 +62,22 @@ jobs:
           kubectl delete -f kubernetes/backend/ --ignore-not-found=true
           kubectl delete -f kubernetes/cert-manager/ --ignore-not-found=true
 
-      - name: Delete platform namespaces
+      - name: Destroy Helmfile platform add-ons
         continue-on-error: true
         run: |
-          kubectl delete namespace monitoring --ignore-not-found=true --wait=false
-          kubectl delete namespace external-dns --ignore-not-found=true --wait=false
-          kubectl delete namespace traefik --ignore-not-found=true --wait=false
-          kubectl delete namespace cert-manager --ignore-not-found=true --wait=false
-          kubectl delete namespace argocd --ignore-not-found=true --wait=false
+          helmfile -f kubernetes/helmfile.yaml destroy
 
-      - name: Wait for AWS load balancers to delete
-        run: sleep 180
+      - name: Delete remaining platform namespaces
+        continue-on-error: true
+        run: |
+          kubectl delete namespace monitoring --ignore-not-found=true --wait=true || true
+          kubectl delete namespace external-dns --ignore-not-found=true --wait=true || true
+          kubectl delete namespace traefik --ignore-not-found=true --wait=true || true
+          kubectl delete namespace cert-manager --ignore-not-found=true --wait=true || true
+          kubectl delete namespace argocd --ignore-not-found=true --wait=true || true
+
+      - name: Wait for AWS load balancers and ENIs to delete
+        run: sleep 300
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
