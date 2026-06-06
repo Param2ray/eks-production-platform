@@ -1,170 +1,170 @@
 name: Terraform Destroy
 
 on:
-workflow_dispatch:
-inputs:
-confirm_destroy:
-description: "Type destroy to confirm full platform and infrastructure destruction"
-required: true
-type: string
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: "Type destroy to confirm full platform and infrastructure destruction"
+        required: true
+        type: string
 
 env:
-AWS_REGION: ${{ vars.AWS_REGION }}
-EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
-TF_WORKING_DIR: terraform
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
+  TF_WORKING_DIR: terraform
 
 permissions:
-id-token: write
-contents: read
+  id-token: write
+  contents: read
 
 jobs:
-terraform-destroy:
-runs-on: ubuntu-latest
-if: ${{ github.event.inputs.confirm_destroy == 'destroy' }}
+  terraform-destroy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm_destroy == 'destroy' }}
 
- steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - name: Configure AWS credentials
-    uses: aws-actions/configure-aws-credentials@v4
-    with:
-      aws-region: ${{ env.AWS_REGION }}
-      role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE }}
 
-  - name: Update kubeconfig
-    continue-on-error: true
-    run: |
-      aws eks update-kubeconfig \
-        --region $AWS_REGION \
-        --name $EKS_CLUSTER_NAME
+      - name: Update kubeconfig
+        continue-on-error: true
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER_NAME
 
-  - name: Install Helmfile
-    continue-on-error: true
-    run: |
-      HELMFILE_VERSION="1.5.2"
-      curl -fsSL \
-        "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz" \
-        -o helmfile.tar.gz
-      tar -xzf helmfile.tar.gz
-      sudo mv helmfile /usr/local/bin/helmfile
-      helmfile --version
+      - name: Install Helmfile
+        continue-on-error: true
+        run: |
+          HELMFILE_VERSION="1.5.2"
+          curl -fsSL \
+            "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz" \
+            -o helmfile.tar.gz
+          tar -xzf helmfile.tar.gz
+          sudo mv helmfile /usr/local/bin/helmfile
+          helmfile --version
 
-  - name: Delete ArgoCD application manifests
-    continue-on-error: true
-    run: |
-      kubectl delete -f kubernetes/argocd/ --ignore-not-found=true
+      - name: Delete ArgoCD application manifests
+        continue-on-error: true
+        run: |
+          kubectl delete -f kubernetes/argocd/ --ignore-not-found=true
 
-  - name: Delete application resources
-    continue-on-error: true
-    run: |
-      kubectl delete -f kubernetes/app/ --ignore-not-found=true
-      kubectl delete -f kubernetes/backend/ --ignore-not-found=true
-      kubectl delete -f kubernetes/cert-manager/ --ignore-not-found=true
+      - name: Delete application resources
+        continue-on-error: true
+        run: |
+          kubectl delete -f kubernetes/app/ --ignore-not-found=true
+          kubectl delete -f kubernetes/backend/ --ignore-not-found=true
+          kubectl delete -f kubernetes/cert-manager/ --ignore-not-found=true
 
-  - name: Delete Kubernetes LoadBalancer services
-    continue-on-error: true
-    run: |
-      kubectl delete svc --all -n traefik --ignore-not-found=true || true
-      kubectl delete svc --all -n monitoring --ignore-not-found=true || true
+      - name: Delete Kubernetes LoadBalancer services
+        continue-on-error: true
+        run: |
+          kubectl delete svc --all -n traefik --ignore-not-found=true || true
+          kubectl delete svc --all -n monitoring --ignore-not-found=true || true
 
-  - name: Destroy Helmfile platform add-ons
-    continue-on-error: true
-    run: |
-      helmfile -f kubernetes/helmfile.yaml destroy || true
+      - name: Destroy Helmfile platform add-ons
+        continue-on-error: true
+        run: |
+          helmfile -f kubernetes/helmfile.yaml destroy || true
 
-  - name: Delete remaining platform namespaces
-    continue-on-error: true
-    run: |
-      kubectl delete namespace monitoring --ignore-not-found=true --wait=true || true
-      kubectl delete namespace external-dns --ignore-not-found=true --wait=true || true
-      kubectl delete namespace traefik --ignore-not-found=true --wait=true || true
-      kubectl delete namespace cert-manager --ignore-not-found=true --wait=true || true
-      kubectl delete namespace argocd --ignore-not-found=true --wait=true || true
+      - name: Delete remaining platform namespaces
+        continue-on-error: true
+        run: |
+          kubectl delete namespace monitoring --ignore-not-found=true --wait=true || true
+          kubectl delete namespace external-dns --ignore-not-found=true --wait=true || true
+          kubectl delete namespace traefik --ignore-not-found=true --wait=true || true
+          kubectl delete namespace cert-manager --ignore-not-found=true --wait=true || true
+          kubectl delete namespace argocd --ignore-not-found=true --wait=true || true
 
-  - name: Wait for Kubernetes AWS resources to release
-    run: sleep 600
+      - name: Wait for Kubernetes AWS resources to release
+        run: sleep 600
 
-  - name: Get VPC ID
-    continue-on-error: true
-    run: |
-      VPC_ID=$(aws ec2 describe-vpcs \
-        --region $AWS_REGION \
-        --filters "Name=tag:Name,Values=eks_vpc" \
-        --query "Vpcs[0].VpcId" \
-        --output text)
+      - name: Get VPC ID
+        continue-on-error: true
+        run: |
+          VPC_ID=$(aws ec2 describe-vpcs \
+            --region $AWS_REGION \
+            --filters "Name=tag:Name,Values=eks_vpc" \
+            --query "Vpcs[0].VpcId" \
+            --output text)
 
-      echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
-      echo "Found VPC: $VPC_ID"
+          echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
+          echo "Found VPC: $VPC_ID"
 
-  - name: Delete leftover Classic LoadBalancers
-    continue-on-error: true
-    run: |
-      for lb in $(aws elb describe-load-balancers \
-        --region $AWS_REGION \
-        --query "LoadBalancerDescriptions[?VPCId=='${VPC_ID}'].LoadBalancerName" \
-        --output text); do
-        echo "Deleting Classic ELB: $lb"
-        aws elb delete-load-balancer \
-          --region $AWS_REGION \
-          --load-balancer-name $lb || true
-      done
+      - name: Delete leftover Classic LoadBalancers
+        continue-on-error: true
+        run: |
+          for lb in $(aws elb describe-load-balancers \
+            --region $AWS_REGION \
+            --query "LoadBalancerDescriptions[?VPCId=='${VPC_ID}'].LoadBalancerName" \
+            --output text); do
+            echo "Deleting Classic ELB: $lb"
+            aws elb delete-load-balancer \
+              --region $AWS_REGION \
+              --load-balancer-name $lb || true
+          done
 
-  - name: Delete leftover ALB/NLB LoadBalancers
-    continue-on-error: true
-    run: |
-      for lb in $(aws elbv2 describe-load-balancers \
-        --region $AWS_REGION \
-        --query "LoadBalancers[?VpcId=='${VPC_ID}'].LoadBalancerArn" \
-        --output text); do
-        echo "Deleting ELBv2: $lb"
-        aws elbv2 delete-load-balancer \
-          --region $AWS_REGION \
-          --load-balancer-arn $lb || true
-      done
+      - name: Delete leftover ALB/NLB LoadBalancers
+        continue-on-error: true
+        run: |
+          for lb in $(aws elbv2 describe-load-balancers \
+            --region $AWS_REGION \
+            --query "LoadBalancers[?VpcId=='${VPC_ID}'].LoadBalancerArn" \
+            --output text); do
+            echo "Deleting ELBv2: $lb"
+            aws elbv2 delete-load-balancer \
+              --region $AWS_REGION \
+              --load-balancer-arn $lb || true
+          done
 
-  - name: Wait for load balancer resources to release
-    run: sleep 300
+      - name: Wait for load balancer resources to release
+        run: sleep 300
 
-  - name: Delete leftover Kubernetes ELB security groups
-    continue-on-error: true
-    run: |
-      for sg in $(aws ec2 describe-security-groups \
-        --region $AWS_REGION \
-        --filters "Name=vpc-id,Values=${VPC_ID}" "Name=group-name,Values=k8s-elb-*" \
-        --query "SecurityGroups[*].GroupId" \
-        --output text); do
-        echo "Deleting Kubernetes ELB security group: $sg"
-        aws ec2 delete-security-group \
-          --region $AWS_REGION \
-          --group-id $sg || true
-      done
+      - name: Delete leftover Kubernetes ELB security groups
+        continue-on-error: true
+        run: |
+          for sg in $(aws ec2 describe-security-groups \
+            --region $AWS_REGION \
+            --filters "Name=vpc-id,Values=${VPC_ID}" "Name=group-name,Values=k8s-elb-*" \
+            --query "SecurityGroups[*].GroupId" \
+            --output text); do
+            echo "Deleting Kubernetes ELB security group: $sg"
+            aws ec2 delete-security-group \
+              --region $AWS_REGION \
+              --group-id $sg || true
+          done
 
-  - name: Wait for AWS dependencies to release
-    run: sleep 300
+      - name: Wait for AWS dependencies to release
+        run: sleep 300
 
-  - name: Setup Terraform
-    uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-  - name: Terraform Init
-    working-directory: ${{ env.TF_WORKING_DIR }}
-    run: terraform init
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
 
-  - name: Terraform Destroy
-    working-directory: ${{ env.TF_WORKING_DIR }}
-    run: |
-      set +e
-      terraform destroy -auto-approve
-      EXIT_CODE=$?
-      set -e
+      - name: Terraform Destroy
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          set +e
+          terraform destroy -auto-approve
+          EXIT_CODE=$?
+          set -e
 
-      if [ $EXIT_CODE -eq 0 ]; then
-        echo "Terraform destroy completed successfully on first attempt."
-        exit 0
-      fi
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "Terraform destroy completed successfully on first attempt."
+            exit 0
+          fi
 
-      echo "First destroy attempt failed, likely due to AWS dependency cleanup delay."
-      echo "Waiting before retry..."
-      sleep 300
+          echo "First destroy attempt failed, likely due to AWS dependency cleanup delay."
+          echo "Waiting before retry..."
+          sleep 300
 
-      terraform destroy -auto-approve
+          terraform destroy -auto-approve
