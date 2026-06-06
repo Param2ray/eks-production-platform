@@ -127,53 +127,38 @@ https://eks.tm.paramjyot2ray.com
 eks-production-platform/
 ├── .github/
 │   └── workflows/
-│       ├── build-scan-push.yaml      # Build, scan & push image to ECR
-│       ├── terraform-plan.yaml       # Terraform plan
+│       ├── build-scan-push.yaml      # Build, scan and push image to ECR
+│       ├── helmfile-sync.yaml        # Deploy platform add-ons with Helmfile
 │       ├── terraform-apply.yaml      # Terraform apply
-│       └── terraform-destroy.yaml    # Guarded destroy workflow
+│       ├── terraform-destroy.yaml    # Guarded teardown workflow
+│       └── terraform-plan.yaml       # Terraform plan
 │
-├── app/                              # Application source code
+├── app/                              # Frontend application source
+├── backend/                          # Backend API source
+│
+├── bootstrap/                        # One-time backend setup
 │
 ├── kubernetes/
-│   ├── app/
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   └── ingress.yaml
-│   │
-│   ├── argocd/
-│   │   ├── deployment.yaml
-│   │   └── service.yaml
-│   │
-│   ├── cert-manager/
-│   │   └── cluster-issuer.yaml
-│   │
-│   ├── helm-values/
-│   │   ├── traefik-values.yaml
-│   │   ├── cert-manager-values.yaml
-│   │   └── external-dns-values.yaml
-│   │
-│   └── monitoring/
-│       ├── prometheus-values.yaml
-│       └── grafana-values.yaml
+│   ├── app/                          # Web app manifests
+│   ├── backend/                      # Backend API manifests
+│   ├── argocd/                       # ArgoCD application definitions
+│   ├── cert-manager/                 # ClusterIssuer manifest
+│   ├── helm-values/                  # Helm values for platform add-ons
+│   ├── monitoring/                   # Prometheus/Grafana values
+│   └── helmfile.yaml                 # Helmfile platform add-ons
 │
 ├── terraform/
-│   ├── main.tf
-│   ├── provider.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── terraform.tfvars
-│   ├── external-dns-iam.tf
+│   ├── modules/
+│   │   ├── vpc/                      # VPC, subnets, routes, NAT, IGW
+│   │   ├── eks/                      # EKS cluster, node groups, access
+│   │   └── ecr/                      # Container registry
 │   │
-│   └── modules/
-│       ├── vpc/
-│       ├── eks/
-│       └── ecr/
-│
-├── bootstrap/
-│   └── terraform/
-│       ├── main.tf
-│       ├── variables.tf
-│       └── outputs.tf
+│   ├── external-dns-iam.tf           # IAM for ExternalDNS
+│   ├── main.tf                       # Root Terraform configuration
+│   ├── provider.tf                   # AWS provider configuration
+│   ├── variables.tf                  # Input variables
+│   ├── outputs.tf                    # Terraform outputs
+│   └── terraform.tfvars              # Environment values
 │
 ├── README.md
 └── .gitignore
