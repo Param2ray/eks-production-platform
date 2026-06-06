@@ -247,34 +247,74 @@ Running Application
 
 * Terraform validation
 * TFLint
-* Checkov
-* Execution plan generation
+* Checkov security scanning
+* Infrastructure execution plan generation
 
 ### Terraform Apply
 
-Creates:
+Creates and configures:
 
 * VPC
-* Subnets
+* Public and Private Subnets
+* Internet Gateway
 * NAT Gateway
 * EKS Cluster
-* Node Groups
+* Managed Node Groups
 * ECR Repository
-* IAM Roles
+* IAM Roles and Policies
+* OIDC Provider
 
-### Build Scan Push Pipeline
+### Platform Add-ons Deployment
 
-* Docker build
-* Trivy scan
-* Push image to ECR
+Helmfile deploys and manages platform services:
+
+* ArgoCD
+* Traefik Ingress Controller
+* cert-manager
+* ExternalDNS
+* Prometheus
+* Grafana
+
+### Build, Scan and Push
+
+* Docker image build
+* Trivy vulnerability scanning
+* Push image to Amazon ECR
 * Update Kubernetes image tag
-* Commit manifest update
+* Commit manifest update to Git
 
-### ArgoCD Deployment
+### GitOps Deployment
 
-ArgoCD continuously monitors the repository and reconciles the cluster state with Git.
+ArgoCD continuously monitors the Git repository and automatically reconciles cluster state with Git.
 
-Git remains the single source of truth.
+Deployment flow:
+
+GitHub Actions
+↓
+Amazon ECR
+↓
+Manifest Update
+↓
+Git Repository
+↓
+ArgoCD
+↓
+Amazon EKS
+
+Git remains the single source of truth for all application and platform deployments.
+
+### Terraform Destroy
+
+Automated environment teardown:
+
+* Remove application resources
+* Remove ArgoCD applications
+* Destroy Helm-managed platform services
+* Clean up AWS load balancers
+* Remove Kubernetes namespaces
+* Destroy EKS infrastructure using Terraform
+
+This enables cost-efficient testing and full environment recreation.
 
 ---
 
@@ -341,6 +381,10 @@ Grafana dashboards provide visibility into:
 ### Terraform Apply
 
 <img width="345" height="235" alt="apply" src="https://github.com/user-attachments/assets/a041edab-4234-4b79-8f92-78af6fd11606" />
+
+### Platform Platform Addons
+
+<img width="336" height="208" alt="platform" src="https://github.com/user-attachments/assets/f9514ce1-7158-4ac3-8355-6f6f6773ae38" />
 
 ### Build Scan Push
 
