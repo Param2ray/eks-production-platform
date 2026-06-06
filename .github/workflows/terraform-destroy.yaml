@@ -65,13 +65,13 @@ jobs:
       - name: Delete Kubernetes LoadBalancer services
         continue-on-error: true
         run: |
-          kubectl delete svc --all -n traefik --ignore-not-found=true
-          kubectl delete svc --all -n monitoring --ignore-not-found=true
+          kubectl delete svc --all -n traefik --ignore-not-found=true || true
+          kubectl delete svc --all -n monitoring --ignore-not-found=true || true
 
       - name: Destroy Helmfile platform add-ons
         continue-on-error: true
         run: |
-          helmfile -f kubernetes/helmfile.yaml destroy
+          helmfile -f kubernetes/helmfile.yaml destroy || true
 
       - name: Delete remaining platform namespaces
         continue-on-error: true
@@ -82,8 +82,50 @@ jobs:
           kubectl delete namespace cert-manager --ignore-not-found=true --wait=true || true
           kubectl delete namespace argocd --ignore-not-found=true --wait=true || true
 
-      - name: Wait for AWS load balancers and ENIs to delete
+      - name: Wait for Kubernetes AWS resources to release
         run: sleep 600
+
+      - name: Get VPC ID
+        id: vpc
+        continue-on-error: true
+        run: |
+          VPC_ID=$(aws ec2 describe-vpcs \
+            --region $AWS_REGION \
+            --filters "Name=tag:Name,Values=eks_vpc" \
+            --query "Vpcs[0].VpcId" \
+            --output text)
+
+          echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
+          echo "Found VPC: $VPC_ID"
+
+      - name: Delete leftover Classic LoadBalancers
+        continue-on-error: true
+        run: |
+          for lb in $(aws elb describe-load-balancers \
+            --region $AWS_REGION \
+            --query "LoadBalancerDescriptions[?VPCId=='${VPC_ID}'].LoadBalancerName" \
+            --output text); do
+            echo "Deleting Classic ELB: $lb"
+            aws elb delete-load-balancer \
+              --region $AWS_REGION \
+              --load-balancer-name $lb || true
+          done
+
+      - name: Delete leftover ALB/NLB LoadBalancers
+        continue-on-error: true
+        run: |
+          for lb in $(aws elbv2 describe-load-balancers \
+            --region $AWS_REGION \
+            --query "LoadBalancers[?VpcId=='${VPC_ID}'].LoadBalancerArn" \
+            --output text); do
+            echo "Deleting ELBv2: $lb"
+            aws elbv2 delete-load-balancer \
+              --region $AWS_REGION \
+              --load-balancer-arn $lb || true
+          done
+
+      - name: Wait for AWS ENIs to release
+        run: sleep 300
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
