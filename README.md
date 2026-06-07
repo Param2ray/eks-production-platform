@@ -17,6 +17,8 @@ Production-style Kubernetes platform deployed on Amazon EKS using Terraform, Git
 
 The platform provisions AWS infrastructure, deploys workloads using GitOps, automates HTTPS certificate management, manages DNS records automatically and provides cluster observability through Prometheus and Grafana.
 
+The platform can be provisioned, deployed, monitored and destroyed entirely through GitHub Actions workflows.
+
 ---
 
 ## Table of Contents
