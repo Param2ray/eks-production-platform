@@ -51,12 +51,13 @@ This project demonstrates the design and deployment of a production-style Kubern
 The platform combines Infrastructure as Code, CI/CD automation, GitOps deployment practices and observability tooling to create a repeatable deployment workflow.
 
 The application was deployed at:
-
-```text
-https://eks.tm.paramjyot2ray.com
 ```
+Example deployment endpoint:
 
----
+https://eks.tm.paramjyot2ray.com
+
+Available when the platform is deployed through the automated infrastructure lifecycle.
+```
 
 ## Key Features
 
@@ -367,7 +368,7 @@ Grafana dashboards provide visibility into:
 
 <img width="345" height="235" alt="apply" src="https://github.com/user-attachments/assets/a041edab-4234-4b79-8f92-78af6fd11606" />
 
-### Platform Platform Addons
+### Platform Addons
 
 <img width="336" height="208" alt="platform" src="https://github.com/user-attachments/assets/f9514ce1-7158-4ac3-8355-6f6f6773ae38" />
 
@@ -420,14 +421,25 @@ AWS Infrastructure Removed
 * Platform engineering concepts
 * Cloud troubleshooting
 
+## Project Outcomes
+
+• Provisioned production-style EKS platform using Terraform
+• Implemented GitOps deployments with ArgoCD
+• Automated DNS management with ExternalDNS
+• Automated TLS certificate issuance with cert-manager
+• Implemented cluster observability with Prometheus and Grafana
+• Secured AWS access using GitHub OIDC authentication
+• Built fully automated platform lifecycle including destroy workflow
+
 ---
 
 ## Future Improvements
 
-* Separate dev and prod environments
-* Horizontal Pod Autoscaler
 * ArgoCD App of Apps
+* Horizontal Pod Autoscaler
 * Network Policies
+* External Secrets
+* Separate dev and prod environments
 * External Secrets
 * Alerting Rules
 * Private EKS API Endpoint
@@ -435,7 +447,6 @@ AWS Infrastructure Removed
 * Budget Alerts
 * Environment Separation
 
-```
 ```
 
 
