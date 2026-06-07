@@ -432,6 +432,7 @@ AWS Infrastructure Removed
 • Implemented cluster observability with Prometheus and Grafana
 • Secured AWS access using GitHub OIDC authentication
 • Built fully automated platform lifecycle including destroy workflow
+• Implemented automated platform add-on management using Helmfile
 
 ---
 
@@ -442,7 +443,6 @@ AWS Infrastructure Removed
 * Network Policies
 * External Secrets
 * Separate dev and prod environments
-* External Secrets
 * Alerting Rules
 * Private EKS API Endpoint
 * Cost Monitoring
