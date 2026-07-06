@@ -42,7 +42,7 @@ The platform can be provisioned, deployed, monitored and destroyed entirely thro
 
 ## Architecture Diagram
 
-<img width="1159" height="1339" alt="EKS Architectural diagram drawio" src="https://github.com/user-attachments/assets/c87678fc-f636-4339-94e8-4a8c1e26ae5d" />
+<img width="1159" height="1339" alt="EKS Architectural diagram drawio" src="https://github.com/user-attachments/assets/3f93b1a8-8a9a-4bd5-9e5e-d414691d62bb" />
 
 ---
 
